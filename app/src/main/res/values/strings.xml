@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Jogging Tracker</string>
+
+    <!-- Buttons -->
+    <string name="start_button_text">Start</string>
+    <string name="stop_button_text">Stop</string>
+
+    <!-- TextViews -->
+    <string name="number_steps_text">Number of Steps:</string>
+    <string name="total_distance_text">Total Distance:</string>
+    <string name="average_pace_text">Average Pace:</string>
+</resources>
