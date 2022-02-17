@@ -1,13 +1,21 @@
 package com.example.joggingtracker
 
+import android.Manifest.permission.ACTIVITY_RECOGNITION
 import android.content.Context
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Button
+import androidx.appcompat.app.AlertDialog
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
+import com.vmadalin.easypermissions.EasyPermissions
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
+    private lateinit var mStartButton: Button
+    private lateinit var mStopButton: Button
 
     companion object {
         private const val KEY_SHARED_PREFERENCES = "com.example.joggingtracker.sharedPreferences"
@@ -26,9 +34,79 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+        mapFragment.getMapAsync(this)
+
+        mStartButton = findViewById<Button>(R.id.startButton)
+        mStopButton = findViewById<Button>(R.id.stopButton)
+
+        mStartButton.setOnClickListener {
+            handleStartButtonClicked()
+        }
+
+        mStopButton.setOnClickListener {
+            handleStopButtonClicked()
+        }
+
+        updateButtonStatus()
+
+        if (isTracking) {
+            startTracking()
+        }
     }
 
-    override fun onMapReady(p0: GoogleMap) {
-        TODO("Not yet implemented")
+    private fun handleStartButtonClicked() {
+        mMap.clear()
+
+        isTracking = true
+        updateButtonStatus()
+
+        startTracking()
+    }
+
+    private fun handleStopButtonClicked() {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.stop_alert_dialog_text)
+            .setPositiveButton(R.string.alert_dialog_positive_text) {_, _ ->
+                isTracking = false
+                updateButtonStatus()
+                stopTracking()
+            }.setNegativeButton(R.string.alert_dialog_negative_text) {_, _ ->
+
+            }
+            .create()
+            .show()
+    }
+
+    private fun updateButtonStatus() {
+        mStartButton.isEnabled = !isTracking
+        mStopButton.isEnabled = isTracking
+    }
+
+    private fun startTracking() {
+        // ACTIVITY_RECOGNITION is only needed for version Q+
+        val isActivityRecognitionPermissionNeeded = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
+        val isActivityRecognitionPermissionGranted = EasyPermissions.hasPermissions(this, ACTIVITY_RECOGNITION)
+
+        if (isActivityRecognitionPermissionNeeded || isActivityRecognitionPermissionGranted) {
+            // Permission Granted
+        } else {
+            // Permission needed
+            EasyPermissions.requestPermissions(
+                host = this,
+                rationale = getString(R.string.activity_recognition_permission_string),
+                requestCode = REQUEST_CODE_ACTIVITY_RECOGNITION,
+                perms = arrayOf(ACTIVITY_RECOGNITION)
+            )
+        }
+    }
+
+    private fun stopTracking() {
+
+    }
+
+    override fun onMapReady(googleMap: GoogleMap) {
+        mMap = googleMap
     }
 }

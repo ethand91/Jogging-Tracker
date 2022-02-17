@@ -9,4 +9,12 @@
     <string name="number_steps_text">Number of Steps:</string>
     <string name="total_distance_text">Total Distance:</string>
     <string name="average_pace_text">Average Pace:</string>
+
+    <!-- Alerts -->
+    <string name="alert_dialog_positive_text">OK</string>
+    <string name="alert_dialog_negative_text">Cancel</string>
+    <string name="stop_alert_dialog_text">Are you sure you want to stop tracking?</string>
+
+    <!-- Permissions -->
+    <string name="activity_recognition_permission_string">Please grant access for activity recogintion, this is need for showing your step counts etc.</string>
 </resources>
