@@ -2,9 +2,14 @@ package com.example.joggingtracker
 
 import android.Manifest.permission.ACTIVITY_RECOGNITION
 import android.content.Context
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import androidx.appcompat.app.AlertDialog
 import com.google.android.gms.maps.GoogleMap
@@ -12,7 +17,9 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.vmadalin.easypermissions.EasyPermissions
 
-class MainActivity : AppCompatActivity(), OnMapReadyCallback {
+class MainActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListener {
+    private val TAG = "MainActivity"
+
     private lateinit var mMap: GoogleMap
     private lateinit var mStartButton: Button
     private lateinit var mStopButton: Button
@@ -91,6 +98,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
         if (isActivityRecognitionPermissionNeeded || isActivityRecognitionPermissionGranted) {
             // Permission Granted
+            initializeStepCounterListener()
         } else {
             // Permission needed
             EasyPermissions.requestPermissions(
@@ -106,7 +114,28 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     }
 
+    private fun initializeStepCounterListener() {
+        val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        val stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+
+        stepCounterSensor ?: return
+
+        sensorManager.registerListener(this@MainActivity, stepCounterSensor, SensorManager.SENSOR_DELAY_FASTEST,)
+    }
+
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+        Log.d(TAG, "onAccuracyChanged: sensor: $sensor; accuracy: $accuracy")
+    }
+
+    override fun onSensorChanged(event: SensorEvent?) {
+        event ?: return
+
+        event.values.firstOrNull()?.let {
+            Log.d(TAG, "Steps: $it")
+        }
     }
 }
